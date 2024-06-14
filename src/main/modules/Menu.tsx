@@ -224,12 +224,16 @@ function createMenu(files: FileObject[]) {
             shell?.openExternal('https://github.com/ransome1/sleek/blob/master/PRIVACY.md');
           },
         },
-        {
-          label: 'Sponsoring',
-          click: () => {
-            shell?.openExternal('https://github.com/sponsors/ransome1');
-          },
-        },
+        ...(!process.mas
+        ? [
+            {
+              label: 'Sponsoring',
+              click: () => {
+                shell?.openExternal('https://github.com/sponsors/ransome1');
+              },
+            },
+          ]
+        : []),
         {
           label: 'sleek on GitHub',
           click: () => {
