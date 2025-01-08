@@ -10,14 +10,19 @@ description: |
   sleek is available for Windows, MacOS and Linux, and in several languages.
 grade: stable
 confinement: strict
-icon: ./assets/icons/512x512.png
+icon: ./assets/icons/icon.png
 license: MIT
+source-code: https://github.com/ransome1/sleek/
+contact: https://github.com/ransome1/sleek/issues
+issues: https://github.com/ransome1/sleek/issues
 compression: lzo
-architectures:
-- build-on: [amd64]
-  run-on: [amd64]
-- build-on: [arm64]
-  run-on: [arm64]
+platforms:
+  arm64:
+    build-on: [arm64]
+    build-for: [arm64]
+  amd64:
+    build-on: [amd64]
+    build-for: [amd64]    
 apps:
   sleek:
     command: snap/command-chain/desktop-launch $SNAP/sleek/sleek --disable-gpu --no-sandbox
@@ -40,7 +45,7 @@ parts:
     build-environment:
     - PATH: "$PATH:$SNAPCRAFT_PART_BUILD/node_modules/.bin"
     build-snaps:
-    - node/18/stable
+    - node/22/stable
     source: .
     override-build: |
       if [ -n "$http_proxy" ]; then
@@ -48,26 +53,31 @@ parts:
         export GLOBAL_AGENT_HTTP_PROXY="${http_proxy}"
         export GLOBAL_AGENT_HTTPS_PROXY="${http_proxy}"
       fi
-
       node.yarn
-      node.yarn make
-
+      node.yarn peggy
+      node.yarn package
       mv $SNAPCRAFT_PART_BUILD/out/sleek-* \
         $SNAPCRAFT_PART_INSTALL/sleek
+
+      ls -l $SNAPCRAFT_PART_INSTALL/sleek/sleek
+      chmod +x $SNAPCRAFT_PART_INSTALL/sleek/sleek
+      ls -l $SNAPCRAFT_PART_INSTALL/sleek/sleek
     stage-packages:
       - libnss3        
   cleanup:
     after: [ sleek ]
     plugin: nil
-    build-snaps: [ gnome ]
+    build-snaps: [gnome-42-2204]
     override-prime: |
+      chmod +x $SNAPCRAFT_PRIME/snap/sleek/sleek
+      ls -l $SNAPCRAFT_PRIME/snap/sleek/sleek
       cd sleek
       ls -l
       rm LICENSES.chromium.html
       rm chrome-sandbox
       ls -l
       set -eux
-      for snap in "gnome"; do  # List all content-snaps you're using here
+      for snap in "gnome-42-2204"; do  # List all content-snaps you're using here
         cd "/snap/$snap/current" && find . -type f,l -exec rm -f "$SNAPCRAFT_PRIME/{}" "$SNAPCRAFT_PRIME/usr/{}" \;
       done
       for CRUFT in bug lintian man; do
